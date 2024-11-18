@@ -12,11 +12,16 @@ export class PostsService {
 
   // repository 접근은 비동기이기 때문에 async 키워드를 사용한다.
   async getAllPosts() {
-    return this.postsRepository.find();
+    return this.postsRepository.find({
+      relations: ['author'],
+    });
   }
 
   async getPostById(id: number) {
-    const post = await this.postsRepository.findOne({ where: { id } });
+    const post = await this.postsRepository.findOne({
+      relations: ['author'],
+      where: { id },
+    });
 
     if (!post) {
       throw new NotFoundException();
@@ -25,12 +30,12 @@ export class PostsService {
     return post;
   }
 
-  async createPost(author: string, title: string, content: string) {
+  async createPost(authorId: number, title: string, content: string) {
     // 1. create -> 저장할 객체를 생성한다.
     // 2. save -> 객체를 저장한다. (create에서 생성한 객체를 저장한다.)
 
     const post = this.postsRepository.create({
-      author,
+      author: { id: authorId },
       title,
       content,
       likeCount: 0,
@@ -42,12 +47,7 @@ export class PostsService {
     return newPost;
   }
 
-  async updatePost(
-    id: number,
-    author?: string,
-    title?: string,
-    content?: string,
-  ) {
+  async updatePost(id: number, title?: string, content?: string) {
     // save의 기능
     // 1. 만약에 데이터가 존재하지 않는다면 새로운 데이터를 생성한다. (id 기준)
     // 2. 만약에 데이터가 존재한다면 데이터를 업데이트한다. (id 기준)
@@ -60,7 +60,6 @@ export class PostsService {
 
     const post = this.postsRepository.create({
       id,
-      author,
       title,
       content,
     });

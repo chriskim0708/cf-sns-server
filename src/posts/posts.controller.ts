@@ -41,21 +41,20 @@ export class PostsController {
   // @Body('author') 데코레이터를 통해서 받고자 하는 데이터의 키를 지정할 수 있다.
   @Post()
   postPosts(
-    @Body('author') author: string,
+    @Body('authorId') authorId: number,
     @Body('title') title: string,
     @Body('content') content: string,
   ) {
-    return this.postsService.createPost(author, title, content);
+    return this.postsService.createPost(authorId, title, content);
   }
 
   @Patch(':id')
   patchPost(
     @Param('id') id: string,
-    @Body('author') author?: string,
     @Body('title') title?: string,
     @Body('content') content?: string,
   ) {
-    return this.postsService.updatePost(+id, author, title, content);
+    return this.postsService.updatePost(+id, title, content);
   }
 
   @Delete(':id')
