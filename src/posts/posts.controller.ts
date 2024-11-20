@@ -8,8 +8,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
+import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
+import { UsersModel } from 'src/users/entities/users.entity';
+import { User } from 'src/users/decorator/user.decorator';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+//import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
 
 /**
  * @Controller('posts')
@@ -42,22 +50,22 @@ export class PostsController {
   // @Body() 데코레이터를 통해서 데이터를 받아올 수 있다.
   // @Body('author') 데코레이터를 통해서 받고자 하는 데이터의 키를 지정할 수 있다.
   @Post()
+  @UseGuards(AccessTokenGuard)
   postPosts(
-    @Body('authorId') authorId: number,
-    @Body('title') title: string,
-    @Body('content') content: string,
+    @User('id') userId: number,
+    @Body() body: CreatePostDto,
     // @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
+    // 가드를 정상적으로 통과했다면 반드시 있음
   ) {
-    return this.postsService.createPost(authorId, title, content);
+    return this.postsService.createPost(userId, body);
   }
 
   @Patch(':id')
   patchPost(
     @Param('id', ParseIntPipe) id: number,
-    @Body('title') title?: string,
-    @Body('content') content?: string,
+    @Body() body: UpdatePostDto,
   ) {
-    return this.postsService.updatePost(id, title, content);
+    return this.postsService.updatePost(id, body);
   }
 
   @Delete(':id')

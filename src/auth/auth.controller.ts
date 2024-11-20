@@ -17,6 +17,7 @@ import {
   AccessTokenGuard,
   RefreshTokenGuard,
 } from './guard/bearer-token.guard';
+import { RegisterUserDto } from './dto/register-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -66,13 +67,8 @@ export class AuthController {
   }
 
   @Post('register/email')
-  postRegisterEmail(
-    @Body('nickname') nickname: string,
-    @Body('email') email: string,
-    @Body('password', new MaxLengthPipe(8), new MinLengthPipe(3, '비밀번호'))
-    password: string,
-  ) {
+  postRegisterEmail(@Body() body: RegisterUserDto) {
     // pipe를 통과하지 못하면 아래 로직이 실행되지 않음
-    return this.authService.registerWithEmail(nickname, email, password);
+    return this.authService.registerWithEmail(body);
   }
 }
