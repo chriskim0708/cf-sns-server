@@ -10,6 +10,9 @@ import {
   Post,
   UseGuards,
   Request,
+  Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
@@ -17,6 +20,8 @@ import { UsersModel } from 'src/users/entities/users.entity';
 import { User } from 'src/users/decorator/user.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PaginatePostDto } from './dto/paginate-post.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 //import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
 
 /**
@@ -34,8 +39,15 @@ export class PostsController {
    */
 
   @Get()
-  getPosts() {
-    return this.postsService.getAllPosts();
+  getPosts(@Query() query: PaginatePostDto) {
+    return this.postsService.paginatePosts(query);
+  }
+
+  @Post('random')
+  @UseGuards(AccessTokenGuard)
+  async postPostsRandom(@User('id') userId: number) {
+    await this.postsService.generatePosts(userId);
+    return true;
   }
 
   // GET /posts/:id
@@ -49,14 +61,24 @@ export class PostsController {
   // POST /posts
   // @Body() 데코레이터를 통해서 데이터를 받아올 수 있다.
   // @Body('author') 데코레이터를 통해서 받고자 하는 데이터의 키를 지정할 수 있다.
+  // A Model, B Model
+  // Post API -> A Model을 저장하고, B Model을 저장한다.
+  // await repository.save(A Model)
+  // await repository.save(B Model)
+  // A를 저장하다가 실패하면 b를 저장하면 안될 경우
+  // all or nothing (transaction)
+  // transaction
+  // start(시작) -> commit(저장) -> rollback(원상복구)
   @Post()
   @UseGuards(AccessTokenGuard)
-  postPosts(
+  async postPosts(
     @User('id') userId: number,
     @Body() body: CreatePostDto,
     // @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
     // 가드를 정상적으로 통과했다면 반드시 있음
   ) {
+    await this.postsService.createPostImage(body);
+
     return this.postsService.createPost(userId, body);
   }
 

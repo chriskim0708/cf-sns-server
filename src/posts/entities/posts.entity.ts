@@ -1,8 +1,9 @@
 import { IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
+import { ImageModel } from 'src/common/entity/image.entity';
 import { stringValidationMessage } from 'src/common/validation-message/string-validation-message';
 import { UsersModel } from 'src/users/entities/users.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class PostsModel extends BaseModel {
@@ -30,4 +31,7 @@ export class PostsModel extends BaseModel {
 
   @Column()
   commentCount: number;
+
+  @OneToMany(() => ImageModel, (image) => image.post)
+  images: ImageModel[];
 }
